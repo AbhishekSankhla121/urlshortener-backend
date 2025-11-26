@@ -16,7 +16,7 @@ const app = express()
 
 const origins = process.env.FRONTEND_URL || "http://localhost:3000"
 
- // using middle ware to pasre json and body req 
+ // using middle ware to pasre json and body req   
 app.use(express.json());
 app.use(express.urlencoded({
     extended:true

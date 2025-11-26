@@ -10,8 +10,14 @@ export const createUrl= catchAsyncError(async(req,res,next)=>{
     if(!url) return next(new ErrorHandler("url is required", 400))
    
     const code = generateCode(7); 
-    const checkCodeexist = await Url.findOne({codeId:code})
-    if(!checkCodeexist)return next(new ErrorHandler("code exist", 409))
+      // check if code already exists
+  const checkCodeexist = await Url.findOne({ codeId: code });
+
+  // if it exists, throw error
+  if (checkCodeexist) {
+    return next(new ErrorHandler("code already exists, try again", 409));
+  }
+
     const response = await Url.create(
     {
         codeId: code,
