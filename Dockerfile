@@ -1,38 +1,30 @@
-# Build stage
-FROM node:25.2.1-alpine3.22 AS builder
+# Use Node 25 Alpine
+FROM node:25.2.1-alpine3.22
 
-#set working directory
+# Set working directory
 WORKDIR /app
 
-#Copy package files
+# Copy package.json first for caching
 COPY package*.json ./
 
-#install dependencies 
-RUN npm ci
+# Install dependencies
+RUN npm install
 
-# copy source code 
+# Copy all source code
 COPY . .
 
-#production stage 
-FROM node:25.2.1-alpine3.22 AS production
-
-RUN apk add --no-cache git
-
-#create app directory
-WORKDIR /app
-
-#create non-root-user
+# Create non-root user
 RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nextjs -u 1001
-
-#Copy built application builder stage
-COPY --from=builder --chown=nextjs:nodejs /app /app
+    adduser -S backend -u 1001
 
 # Switch to non-root user
-USER nextjs
+USER backend
 
-# Expose port
+# Expose backend port
 EXPOSE 5000
 
-# Start the application
-CMD ["node", "index.js"]
+# Set environment variable to enable polling for file changes
+ENV CHOKIDAR_USEPOLLING=true
+
+# Use nodemon for live reload
+CMD ["npx", "nodemon", "index.js", "--legacy-watch"]
